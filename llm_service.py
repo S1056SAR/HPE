@@ -4,6 +4,7 @@ import logging
 import os
 from environment import GROQ_API_KEY, GROQ_MODEL
 
+
 logger = logging.getLogger(__name__)
 
 class LLMService:
