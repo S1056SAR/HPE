@@ -3,6 +3,7 @@ import logging
 from typing import Dict, List, Any, Optional
 import json
 
+#Updated till the final DB was created
 logger = logging.getLogger(__name__)
 
 class DocumentProcessor:
