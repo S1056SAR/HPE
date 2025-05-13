@@ -11,6 +11,7 @@ from web_search import WebSearcher
 from environment import ENABLE_WEB_SEARCH, MAX_SEARCH_RESULTS
 from environment import GROQ_MODEL, GROQ_API_KEY
 
+#Updated till the final DB was created
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
