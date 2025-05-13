@@ -2,6 +2,7 @@ import logging
 from duckduckgo_search import DDGS
 from typing import List, Dict, Any
 
+
 logger = logging.getLogger(__name__)
 
 class WebSearcher:
