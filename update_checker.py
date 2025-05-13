@@ -1,269 +1,230 @@
 import schedule
 import time
 import logging
-from datetime import datetime
+from typing import Dict, List, Any
+from datetime import datetime as dt # Alias datetime to avoid conflict
 import threading
 from scraper import NetworkDocScraper
-from ingestion import DataIngestionPipeline
+from ingestion import DataIngestionPipeline # For _save_tracking_data and processor
+from vector_store import VectorStore # For collection name constants
 from environment import UPDATE_CHECK_INTERVAL
-import datetime
 import json
 import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-    
+
 class UpdateChecker:
     def __init__(self):
         self.scraper = NetworkDocScraper()
-        self.ingestion_pipeline = DataIngestionPipeline()
-        self.last_checked = {}
+        # UpdateChecker might need its own VectorStore instance or access to DataIngestionPipeline's
+        self.ingestion_pipeline = DataIngestionPipeline() # Provides vector_store and processor
+        self.last_checked_docs = {} # Stores {url: date_string} for comparison
         self.running = False
         self.thread = None
-    
+        self._load_last_checked_state()
+
+
+    def _load_last_checked_state(self):
+        state_file = os.path.join(self.ingestion_pipeline.tracking_dir, "update_checker_state.json")
+        if os.path.exists(state_file):
+            try:
+                with open(state_file, 'r') as f:
+                    self.last_checked_docs = json.load(f)
+                    logger.info("Loaded previous update checker state.")
+            except json.JSONDecodeError:
+                logger.error(f"Error decoding JSON from update checker state file: {state_file}. Starting fresh.")
+                self.last_checked_docs = {}
+        else:
+            self.last_checked_docs = {}
+
+    def _save_last_checked_state(self):
+        state_file = os.path.join(self.ingestion_pipeline.tracking_dir, "update_checker_state.json")
+        os.makedirs(self.ingestion_pipeline.tracking_dir, exist_ok=True)
+        try:
+            with open(state_file, 'w') as f:
+                json.dump(self.last_checked_docs, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to save update checker state to {state_file}: {e}")
+
+
     def check_for_updates(self, url, vendor, doc_type):
-        """Check if there are new documents available"""
-        logger.info(f"Checking for updates: {vendor} {doc_type}")
-        is_news_source  = False
-        
-        if doc_type == "release_notes":
-            current_docs = self.scraper.parse_cisco_release_notes(url)
-        elif doc_type == "config_guides":
-            current_docs = self.scraper.parse_cisco_config_guides(url)
-        elif doc_type == "posts": # *** ADD THIS CASE ***
-            current_docs = self.scraper.parse_hacker_news(url)
-            is_news_source  = True
-        else:
-            logger.error(f"Unknown document type: {doc_type}")
-            return
-        
-        # if save_scraped_data and current_docs:
-        #     # Define filename (e.g., hackernews_posts_scrape.json)
-        #     filename = f"{vendor.lower()}_{doc_type.lower()}_scrape.json"
-        #     try:
-        #         # Use 'with' to ensure the file is closed properly
-        #         with open(filename, 'w', encoding='utf-8') as f:
-        #             json.dump(current_docs, f, ensure_ascii=False, indent=4) # [11, 13, 16]
-        #         logger.info(f"Successfully saved scraped data ({len(current_docs)} items) to {filename}")
-        #     except IOError as e:
-        #         logger.error(f"Error saving scraped data to {filename}: {e}")
-        #     except Exception as e: # Catch other potential errors during dump
-        #          logger.error(f"An unexpected error occurred while saving {filename}: {e}")
-        
+        logger.info(f"Checking for updates: {vendor} {doc_type} from {url}")
+        current_docs_metadata = [] # List of dicts {title, url, date, vendor, doc_type}
 
-        if is_news_source and current_docs:
-            logger.info(f"Fetching content for {len(current_docs)} scraped news items...")
-            enriched_docs = [] # Store docs with content
-            for i, doc in enumerate(current_docs):
-                try:
-                    logger.info(f"Fetching content for item {i+1}/{len(current_docs)}: {doc.get('title', doc['url'])}")
-                    # Use the existing extract_document_content method [6]
-                    # Pass the whole 'doc' dictionary as it might be needed (like for PDF type detection)
-                    content = self.scraper.extract_document_content(doc)
-                    # Add the extracted content to the dictionary
-                    doc['content'] = content if content else "" # Add empty string if extraction fails [10, 14, 15]
-                    enriched_docs.append(doc)
-                    # Optional: Add a small delay between content fetches if needed
-                    # time.sleep(1) 
-                except Exception as e:
-                    logger.error(f"Error fetching content for {doc.get('url', 'N/A')}: {e}", exc_info=True)
-                    # Add the doc even if content extraction failed, with empty content
-                    doc['content'] = "" 
-                    enriched_docs.append(doc)
+        if doc_type == "release_notes" and vendor.lower() == "cisco":
+            current_docs_metadata = self.scraper.parse_cisco_release_notes(url)
+        elif doc_type == "config_guides" and vendor.lower() == "cisco":
+            current_docs_metadata = self.scraper.parse_cisco_config_guides(url)
+        elif doc_type == "posts" and vendor.lower() == "hackernews": # "HackerNews" in main.py
+            current_docs_metadata = self.scraper.parse_hacker_news(url)
+        # Add more parsers here if needed, e.g., for Aruba updates
+        # elif doc_type == "aos_cx_docs" and vendor.lower() == "aruba":
+        # current_docs_metadata = self.scraper.parse_aruba_documentation(url) # Assuming this can find updates
+        else:
+            logger.warning(f"No specific parser for vendor '{vendor}' and doc_type '{doc_type}'. Skipping update check for this source.")
+            return
+
+        if not current_docs_metadata:
+            logger.info(f"No documents found by scraper for {vendor} {doc_type} at {url}.")
+            return
+
+        new_or_updated_docs_metadata = []
+        for doc_meta in current_docs_metadata:
+            doc_url = doc_meta["url"]
+            # Use current time as 'date' for HackerNews as it changes frequently
+            # For others, rely on parsed date or a default.
+            doc_date_str = doc_meta.get("date", dt.min.isoformat())
+            if vendor.lower() == "hackernews": # Special handling for rapidly changing content
+                 doc_date_str = dt.now().isoformat()
+
+
+            if doc_url not in self.last_checked_docs:
+                new_or_updated_docs_metadata.append(doc_meta)
+                logger.info(f"Detected new document: {doc_meta.get('title', doc_url)}")
+            elif doc_date_str != self.last_checked_docs.get(doc_url): # Check if date changed
+                new_or_updated_docs_metadata.append(doc_meta)
+                logger.info(f"Detected updated document: {doc_meta.get('title', doc_url)} (Date changed from {self.last_checked_docs.get(doc_url)} to {doc_date_str})")
             
-            current_docs = enriched_docs # Replace original list with enriched one
-            logger.info("Finished fetching content for news items.")
-
-            # --- Save the enriched data to JSON ---
-            filename = f"{vendor.lower()}_{doc_type.lower()}_scrape_with_content.json" # New filename
-            try:
-                with open(filename, 'w', encoding='utf-8') as f:
-                    json.dump(current_docs, f, ensure_ascii=False, indent=4) # [11, 13, 16]
-                logger.info(f"Successfully saved enriched scraped data ({len(current_docs)} items) to {filename}")
-            except IOError as e:
-                logger.error(f"Error saving enriched scraped data to {filename}: {e}")
-            except Exception as e: # Catch other potential errors during dump
-                 logger.error(f"An unexpected error occurred while saving {filename}: {e}")
-
-
-
-        key = f"{vendor}_{doc_type}"
+            # Update the last_checked_docs with the current state for this URL
+            self.last_checked_docs[doc_url] = doc_date_str
         
-        if key not in self.last_checked:
-            # self.last_checked[key] = {doc["url"]: doc["date"] for doc in current_docs}
-            # logger.info(f"Initial check for {key}: found {len(current_docs)} documents")
-            # return
-            self.last_checked[key] = {doc["url"]: doc.get("date", datetime.datetime.min.isoformat()) for doc in current_docs} # Use a default date if missing
-            logger.info(f"Initial check for {key}: found {len(current_docs)} documents")
-            # --- On initial check, process *all* found documents ---
-            # Pass vendor along with doc_type
-            self._process_new_documents(current_docs, vendor, doc_type) 
-            return
-        
-        new_docs = []
-        current_state = {}
-        
-        # for doc in current_docs:
-        #     if doc["url"] not in self.last_checked[key]:
-        #         new_docs.append(doc)
-        #     elif doc["date"] != self.last_checked[key][doc["url"]]:
-        #         # Document was updated
-        #         new_docs.append(doc)
-        
-        # # Update the stored state
-        # self.last_checked[key] = {doc["url"]: doc["date"] for doc in current_docs}
-        
-        for doc in current_docs:
-            doc_url = doc["url"]
-            # Handle cases where 'date' might be missing
-            doc_date = doc.get("date", datetime.datetime.min.isoformat()) 
-            current_state[doc_url] = doc_date # Build the latest state
+        self._save_last_checked_state() # Save state after each check
 
-            if doc_url not in self.last_checked[key]:
-                new_docs.append(doc)
-                logger.info(f"Detected new document: {doc.get('title', doc_url)}")
-            # Check date only if it exists in both current doc and last checked state
-            elif doc_date != datetime.datetime.min.isoformat() and \
-                 doc_url in self.last_checked[key] and \
-                 doc_date != self.last_checked[key][doc_url]:
-                # Document was updated
-                new_docs.append(doc)
-                logger.info(f"Detected updated document: {doc.get('title', doc_url)}")
-
-
-        # Update the stored state *after* comparison
-        self.last_checked[key] = current_state
-
-
-        # Process new documents if any
-        if new_docs:
-            logger.info(f"Found {len(new_docs)} new or updated documents for {key}")
-            self._process_new_documents(new_docs, vendor, doc_type)
+        if new_or_updated_docs_metadata:
+            logger.info(f"Found {len(new_or_updated_docs_metadata)} new or updated documents for {vendor} {doc_type}.")
+            self._process_new_documents(new_or_updated_docs_metadata, vendor, doc_type)
         else:
-            logger.info(f"No new or updated documents found for {key}")
-    
-    def _process_new_documents(self, documents, vendor, doc_type):
-        # """Process newly discovered documents"""
-        # for doc in documents:
-        #     try:
-        #         content = self.scraper.extract_document_content(doc["url"])
-        #         if not content:
-        #             continue
-        """Process newly discovered documents"""
+            logger.info(f"No new or updated documents found for {vendor} {doc_type}.")
+
+
+    def _process_new_documents(self, documents_metadata: List[Dict], vendor: str, doc_type: str):
+        """Process newly discovered or updated documents"""
         processed_count = 0
-        for doc in documents:
-            doc_url = doc['url']
-            doc_key = f"{vendor.lower()}_{doc_type.lower()}_{doc_url}"
+        for doc_meta in documents_metadata:
+            doc_url = doc_meta['url']
+            # Use a unique key for ingestion tracking, combining vendor, type, and URL
+            # This is different from last_checked_docs key.
+            ingestion_doc_key = f"{vendor.lower()}_{doc_type.lower()}_{doc_url}"
+            
+            # Check against the ingestion pipeline's tracking to avoid re-processing if already ingested by other means
+            # However, for updates, we might want to re-ingest. This simple check prevents re-ingestion
+            # if an "updated" doc was somehow ingested between the check and now.
+            # A more sophisticated update strategy might involve deleting old versions.
+            if ingestion_doc_key in self.ingestion_pipeline.ingested_files:
+                # For a true update, you might want to remove existing chunks for this URL first.
+                # For now, we'll log and potentially skip or decide to re-add.
+                logger.info(f"Document {doc_meta.get('title', doc_url)} marked as updated/new, but already in ingestion tracking. Re-ingesting.")
+                # Optionally: self.ingestion_pipeline.vector_store.delete_documents_by_url(doc_url) if such method exists
 
-            if doc_key in self.ingestion_pipeline.ingested_files:
-                logger.info(f"Document already ingested (according to tracking file): {doc.get('title', doc_url)}. Skipping processing.")
-                continue
-
-            logger.info(f"Processing new/updated document: {doc.get('title', doc_url)}")
+            logger.info(f"Processing new/updated document: {doc_meta.get('title', doc_url)}")
             try:
-                # Use the 'doc' dictionary directly for extract_document_content
-                content = self.scraper.extract_document_content(doc) 
+                content = self.scraper.extract_document_content(doc_meta) # Pass full doc_meta
                 if not content:
-                    # logger.warning(f"No content extracted from {doc.get('url', 'N/A')}, skipping.")
-                    logger.warning(f"No content extracted from {doc_url}, skipping.")
+                    logger.warning(f"No content extracted from {doc_url} during update processing, skipping.")
                     continue
-                
-                # Use the ingestion pipeline to process and store the document
-                if doc_type == "release_notes":
-                    # Create metadata
-                    metadata = {**doc}
-                    # Extract product info
-                    product_info = self.ingestion_pipeline.processor.extract_product_info(content)
-                    metadata.update(product_info)
-                    
-                    # Chunk and store
-                    chunks = self.ingestion_pipeline.processor.chunk_document(content, metadata)
-                    self.ingestion_pipeline.vector_store.add_documents("release_notes", chunks)
-                    
-                elif doc_type == "config_guides":
-                    # Create metadata
-                    metadata = {**doc}
-                    # Extract product info
-                    product_info = self.ingestion_pipeline.processor.extract_product_info(content)
-                    metadata.update(product_info)
-                    
-                    # Chunk and store
-                    chunks = self.ingestion_pipeline.processor.chunk_document(content, metadata)
-                    self.ingestion_pipeline.vector_store.add_documents("config_guides", chunks)
-                
-                elif doc_type == "posts": # *** ADD THIS CASE ***
-                     metadata = {**doc}
-                     chunks = self.ingestion_pipeline.processor.chunk_document(content, metadata)
-                     collection_name = "hacker_news_posts"
-                     if collection_name:
-                         self.ingestion_pipeline.vector_store.add_documents(collection_name, chunks)
-                    #      logger.info(f"Processed and stored new document to '{collection_name}': {doc.get('title', 'N/A')}")
-                    #  else:
-                    #     logger.warning(f"No collection specified for doc_type '{doc_type}'")
-                         self.ingestion_pipeline.ingested_files[doc_key] = {
-                         "timestamp": datetime.datetime.now().isoformat(),
-                         "title": doc.get("title", "N/A"),
-                         "url": doc_url,
-                         "chunks": len(chunks)
-                         }
-                        # --- Save the updated tracking data ---
-                         self.ingestion_pipeline._save_tracking_data() 
-                         processed_count += 1
-                         logger.info(f"Successfully processed and stored document to '{collection_name}': {doc.get('title', doc_url)}")
-                     else:
-                         logger.error(f"Could not determine collection name for doc_type '{doc_type}'. Skipping storage for: {doc_url}")
 
-                logger.info(f"Processed new document: {doc['title']}")
-
+                # Prepare metadata for document processor and vector store
+                # The `doc_meta` from scraping already has vendor, title, url, date, doc_type.
+                # `extract_product_info` will add more.
+                product_info = self.ingestion_pipeline.processor.extract_product_info(content)
+                final_metadata = {**doc_meta, **product_info}
                 
+                # Ensure 'vendor' field is consistent and lowercase for metadata filtering
+                final_metadata['vendor'] = vendor.lower() 
+
+                chunks = self.ingestion_pipeline.processor.chunk_document(content, final_metadata)
+                
+                collection_key_for_vs = ""
+                if vendor.lower() == "hackernews":
+                    collection_key_for_vs = VectorStore.HACKER_NEWS_COLLECTION_NAME
+                else:
+                    # For Cisco, Aruba, etc., the vendor name itself is the key
+                    # which VectorStore.add_documents will use as a vendor tag for the main collection.
+                    collection_key_for_vs = vendor.lower() 
+                
+                if chunks:
+                    self.ingestion_pipeline.vector_store.add_documents(collection_key_for_vs, chunks)
+                    
+                    # Update ingestion tracking in the ingestion_pipeline
+                    self.ingestion_pipeline.ingested_files[ingestion_doc_key] = {
+                        "timestamp": dt.now().isoformat(),
+                        "title": doc_meta.get("title", "N/A"),
+                        "url": doc_url,
+                        "chunks_added_during_update": len(chunks)
+                    }
+                    self.ingestion_pipeline._save_tracking_data() # Call method from ingestion_pipeline
+                    processed_count += 1
+                    logger.info(f"Successfully processed and stored updated/new document to '{collection_key_for_vs}': {doc_meta.get('title', doc_url)}")
+                else:
+                    logger.warning(f"No chunks generated for updated/new document: {doc_meta.get('title', doc_url)}")
+
             except Exception as e:
-                logger.error(f"Error processing new document {doc['url']}: {str(e)}")
-    
+                logger.error(f"Error processing new/updated document {doc_url}: {str(e)}", exc_info=True)
+        
+        logger.info(f"Finished processing {processed_count} new/updated documents for {vendor} {doc_type}.")
+
+
     def start(self):
-        """Start the update checker as a background thread"""
         if self.running:
             logger.warning("Update checker is already running")
             return
         
         self.running = True
-        
-        # Schedule update checks
+        logger.info(f"Update checker configured to run every {UPDATE_CHECK_INTERVAL} hours (HackerNews every 1 min for test).")
+
+        # Schedule Cisco Release Notes
         schedule.every(UPDATE_CHECK_INTERVAL).hours.do(
-            self.check_for_updates, 
+            self.check_for_updates,
             url="https://www.cisco.com/c/en/us/support/switches/nexus-9000-series-switches/products-release-notes-list.html",
             vendor="Cisco",
             doc_type="release_notes"
         )
-        
+        # Schedule Cisco Config Guides
         schedule.every(UPDATE_CHECK_INTERVAL).hours.do(
-            self.check_for_updates, 
+            self.check_for_updates,
             url="https://www.cisco.com/c/en/us/support/switches/nexus-9000-series-switches/products-installation-and-configuration-guides-list.html",
             vendor="Cisco",
             doc_type="config_guides"
         )
-        schedule.every(1).minutes.do(
-             self.check_for_updates,
-             url="https://news.ycombinator.com/newest", # Hacker News URL
-             vendor="HackerNews",               # Custom vendor name
-             doc_type="posts"                  # Custom doc type
+        # Schedule Hacker News (more frequently for testing updates)
+        schedule.every(1).minutes.do( # Check every minute for testing
+            self.check_for_updates,
+            url="https://news.ycombinator.com/newest",
+            vendor="HackerNews", # Consistent with ingestion
+            doc_type="posts"
         )
-        
-        # Run in a separate thread
+        # Add Aruba check if desired
+        # schedule.every(UPDATE_CHECK_INTERVAL).hours.do(
+        #     self.check_for_updates,
+        #     url="https://arubanetworking.hpe.com/techdocs/AOS-CX/Consolidated_RNs/HTML-9300/Content/PDFs.htm", # Example URL
+        #     vendor="Aruba",
+        #     doc_type="aos_cx_docs" # A new doc_type, needs a parser in scraper
+        # )
+
         def run_scheduler():
-            logger.info("Starting update checker thread")
+            logger.info("Starting update checker thread...")
+            # Run once immediately for each scheduled job if desired for testing
+            # schedule.run_all() 
             while self.running:
                 schedule.run_pending()
-                time.sleep(60)  # Check every minute
-        
-        self.thread = threading.Thread(target=run_scheduler)
-        self.thread.daemon = True
+                time.sleep(30) # Check schedule every 30 seconds
+            logger.info("Update checker thread stopped.")
+
+        self.thread = threading.Thread(target=run_scheduler, daemon=True)
         self.thread.start()
-        
-        logger.info("Update checker started")
-    
+        logger.info("Update checker background thread started.")
+
     def stop(self):
-        """Stop the update checker"""
+        if not self.running:
+            logger.info("Update checker is not running.")
+            return
+        
         self.running = False
-        if self.thread:
-            self.thread.join(timeout=5)
-            logger.info("Update checker stopped")
+        if self.thread and self.thread.is_alive():
+            logger.info("Attempting to stop update checker thread...")
+            self.thread.join(timeout=10) # Wait for thread to finish
+            if self.thread.is_alive():
+                logger.warning("Update checker thread did not stop gracefully.")
+        logger.info("Update checker stopped.")
+
