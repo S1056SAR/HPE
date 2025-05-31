@@ -1,0 +1,12 @@
+uvicorn
+fastapi
+selenium
+webdriver_manager
+bs4 
+requests
+PyPDF2
+chromadb
+sentence_transformers
+groq
+duckduckgo_search
+schedule
