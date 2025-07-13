@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Network Topology Analyzer</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Network Topology Analyzer</h1>
+            <p>Upload your network diagram and get comprehensive AI-powered replacement recommendations</p>
+        </header>
+
+        <div class="upload-section">
+            <form id="topology-form" enctype="multipart/form-data">
+                <div class="file-upload">
+                    <label for="topology-image">📁 Upload Network Topology Image:</label>
+                    <input type="file" 
+                           id="topology-image" 
+                           name="image" 
+                           accept="image/*" 
+                           data-max-size="10485760"
+                           required>
+                    <div class="file-preview" id="file-preview"></div>
+                    <div class="upload-help">
+                        <small>Supported formats: PNG, JPEG, GIF, WebP | Max size: 10MB</small>
+                    </div>
+                </div>
+
+                <div class="query-section">
+                    <label for="replacement-query">🎯 Describe Your Network Transformation Goals:</label>
+                    <textarea id="replacement-query" 
+                              name="replacement_query" 
+                              data-min-length="20"
+                              placeholder="Describe your network transformation requirements in detail. For example:
+
+• Replace all Cisco devices with Juniper equivalents to reduce licensing costs by 30% while maintaining current port density
+• Upgrade datacenter infrastructure for better performance and energy efficiency with 100G connectivity
+• Modernize branch office networks with SD-WAN capabilities and cloud-managed devices
+
+Include details about:
+- Current pain points or limitations
+- Performance requirements and goals
+- Budget constraints or cost targets
+- Timeline considerations
+- Compliance or security requirements"
+                              rows="6" 
+                              required></textarea>
+                </div>
+
+                <button type="submit" id="analyze-btn">
+                    <span class="btn-text">🚀 Generate AI Analysis & Recommendations</span>
+                    <span class="btn-loading" style="display: none;">🤖 AI Analysis in Progress...</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="results-section" id="results-section" style="display: none;">
+            <div class="tabs">
+                <button class="tab-button active" onclick="showTab('summary')">📊 Executive Summary</button>
+                <button class="tab-button" onclick="showTab('explanation')">🤖 AI Explanation</button>
+                <button class="tab-button" onclick="showTab('original')">🔄 Current Topology</button>
+                <button class="tab-button" onclick="showTab('modified')">✨ Proposed Topology</button>
+                <button class="tab-button" onclick="showTab('comparison')">⚖️ Before & After</button>
+                <button class="tab-button" onclick="showTab('recommendations')">💡 Recommendations</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- Executive Summary Tab -->
+                <div id="summary-tab" class="tab-pane active">
+                    <h3>📊 Executive Summary & Analysis</h3>
+                    <div id="analysis-summary" class="summary-content"></div>
+                    
+                    <h3>🔍 AI Analysis & Justification</h3>
+                    <div id="context-sources" class="markdown-content"></div>
+                    
+                    <h3>📈 Project Overview</h3>
+                    <div id="modification-overview" class="overview-content"></div>
+                </div>
+
+                <!-- AI Explanation Tab -->
+                <div id="explanation-tab" class="tab-pane">
+                    <h3>🤖 AI-Generated Topology Explanation</h3>
+                    <div id="topology-explanation" class="explanation-content"></div>
+                    
+                    <h3>📊 Transformation Impact Analysis</h3>
+                    <div class="impact-metrics">
+                        <div id="impact-summary" class="impact-content"></div>
+                    </div>
+                </div>
+
+                <!-- Original Topology Tab -->
+                <div id="original-tab" class="tab-pane">
+                    <h3>🔄 Current Network Topology</h3>
+                    <div class="diagram-container">
+                        <pre class="mermaid" id="original-diagram"></pre>
+                    </div>
+                    <div id="original-details" class="topology-details">
+                        <h4>📋 Current Infrastructure Details</h4>
+                        <div id="original-device-list" class="device-list"></div>
+                        <div id="original-network-info" class="network-info"></div>
+                    </div>
+                </div>
+
+                <!-- Modified Topology Tab -->
+                <div id="modified-tab" class="tab-pane">
+                    <h3>✨ Proposed Network Topology</h3>
+                    <div class="diagram-container" id="modified-diagram-container">
+                        <pre class="mermaid" id="modified-diagram"></pre>
+                    </div>
+                    <div class="action-buttons-diagram" style="text-align: center; margin-top: 1rem; margin-bottom: 1rem;">
+                        <a id="download-svg-link" class="export-btn" href="#" target="_blank" download="proposed_topology.svg" style="display: none;">Download as SVG</a>
+                        <a id="download-png-link" class="export-btn" href="#" target="_blank" download="proposed_topology.png" style="display: none;">Download as PNG</a>
+                    </div>
+
+                    <div id="modified-details" class="topology-details">
+                        <h4>🔄 Proposed Infrastructure Changes</h4>
+                        <div id="modified-device-list" class="device-list"></div>
+                        <div id="modification-summary" class="modification-summary"></div>
+                    </div>
+                </div>
+
+                <!-- Comparison Tab -->
+                <div id="comparison-tab" class="tab-pane">
+                    <h3>⚖️ Before & After Comparison</h3>
+                    <div class="diagram-container">
+                        <pre class="mermaid" id="comparison-diagram"></pre>
+                    </div>
+                    <div class="comparison-details">
+                        <div class="comparison-grid">
+                            <div class="comparison-column">
+                                <h4>📊 Current State</h4>
+                                <div id="current-state-summary" class="state-summary"></div>
+                            </div>
+                            <div class="comparison-column">
+                                <h4>🎯 Proposed State</h4>
+                                <div id="proposed-state-summary" class="state-summary"></div>
+                            </div>
+                        </div>
+                        <div class="improvement-metrics">
+                            <h4>📈 Expected Improvements</h4>
+                            <div id="improvement-metrics" class="metrics-grid"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Recommendations Tab -->
+                <div id="recommendations-tab" class="tab-pane">
+                    <h3>💡 Detailed Device Replacement Recommendations</h3>
+                    <div id="recommendations-list" class="recommendations-content"></div>
+                    
+                    <h3>💰 Cost-Benefit Analysis</h3>
+                    <div id="cost-analysis" class="cost-content"></div>
+                    
+                    <h3>⚠️ Risk Assessment</h3>
+                    <div id="risk-assessment" class="risk-content"></div>
+                    
+                    <h3>📊 Success Metrics</h3>
+                    <div id="success-metrics" class="metrics-content"></div>
+                </div>
+            </div>
+
+            <!-- Export and Action Buttons -->
+            <div class="action-buttons">
+                <button onclick="exportResults()" class="export-btn">
+                    📄 Export Analysis Report
+                </button>
+                <button onclick="shareResults()" class="share-btn">
+                    🔗 Share Results
+                </button>
+                <button onclick="startNewAnalysis()" class="new-analysis-btn">
+                    🔄 New Analysis
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div class="error-section" id="error-section" style="display: none;">
+            <div class="error-message">
+                <h3>❌ Analysis Error</h3>
+                <p id="error-text"></p>
+                <div class="error-actions">
+                    <button onclick="hideError()" class="retry-btn">Try Again</button>
+                    <button onclick="reportIssue()" class="report-btn">Report Issue</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loading-overlay" data-step-duration="3000" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3>🤖 AI Analysis in Progress</h3>
+                <p id="loading-message">Analyzing your network topology with Gemini AI...</p>
+                <div class="progress-steps">
+                    <div class="step active" id="step-1">📸 Processing Image</div>
+                    <div class="step" id="step-2">🔍 Identifying Devices</div>
+                    <div class="step" id="step-3">🔍 Searching Knowledge Base</div>
+                    <div class="step" id="step-4">💡 Generating Recommendations</div>
+                    <div class="step" id="step-5">📊 Creating Diagrams</div>
+                    <div class="step" id="step-6">📝 Preparing Report</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Detail Modal -->
+        <div class="modal" id="device-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Device Details</h3>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Device details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeModal()" class="modal-btn">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2025 AI Network Topology Analyzer | Powered by Gemini AI & Groq</p>
+            <div class="footer-links">
+                <a href="#" onclick="showAbout()">About</a>
+                <a href="#" onclick="showHelp()">Help</a>
+                <a href="#" onclick="showPrivacy()">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- IMPORTANT: Use type="module" for ES6 imports -->
+    <script type="module" src="/static/js/main.js"></script>
+
+
+</body>
+</html>
