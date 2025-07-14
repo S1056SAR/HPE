@@ -1,0 +1,478 @@
+{
+    "success": true,
+    "original_topology": {
+        "devices": [
+            {
+                "id": "cisco_catalyst_9500",
+                "type": "switch",
+                "vendor": "cisco",
+                "model": "Catalyst 9500",
+                "specifications": {},
+                "connections": ["aruba_cx6300", "juniper_ex4300"],
+                "location": "top",
+                "role": "core"
+            },
+            {
+                "id": "aruba_cx6300",
+                "type": "switch",
+                "vendor": "aruba",
+                "model": "CX 6300",
+                "specifications": {},
+                "connections": ["cisco_catalyst_9500", "juniper_srx"],
+                "location": "left-middle",
+                "role": "distribution"
+            },
+            {
+                "id": "juniper_srx",
+                "type": "firewall",
+                "vendor": "juniper",
+                "model": "SRX",
+                "specifications": {},
+                "connections": ["aruba_cx6300", "cisco_router"],
+                "location": "left-middle",
+                "role": "firewall"
+            },
+            {
+                "id": "juniper_ex4300",
+                "type": "switch",
+                "vendor": "juniper",
+                "model": "EX4300",
+                "specifications": {},
+                "connections": ["cisco_catalyst_9500", "cisco_access_switch"],
+                "location": "right-middle",
+                "role": "distribution"
+            },
+            {
+                "id": "cisco_access_switch",
+                "type": "switch",
+                "vendor": "cisco",
+                "model": "CISO",
+                "specifications": {},
+                "connections": [
+                    "juniper_ex4300",
+                    "workstation_vlan10",
+                    "workstation_vlan20",
+                    "workstation_vlan30",
+                    "wireless_access_point"
+                ],
+                "location": "right-middle",
+                "role": "access"
+            },
+            {
+                "id": "cisco_router",
+                "type": "router",
+                "vendor": "cisco",
+                "model": "Ruter",
+                "specifications": {},
+                "connections": ["juniper_srx", "internet"],
+                "location": "left-bottom",
+                "role": "edge"
+            },
+            {
+                "id": "wireless_access_point",
+                "type": "access_point",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-middle",
+                "role": "access"
+            },
+            {
+                "id": "workstation_vlan10",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "workstation_vlan20",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "workstation_vlan30",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "internet",
+                "type": "gateway",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_router"],
+                "location": "bottom-left",
+                "role": "internet"
+            }
+        ],
+        "topology_structure": "Hierarchical topology with a core layer (Cisco Catalyst 9500), distribution layer (Aruba CX 6300, Juniper EX4300), and access layer (Cisco CISO switch).  A Juniper SRX firewall is placed between the core and distribution layers on the left side. A Cisco router connects to the internet.",
+        "network_segments": ["vlan10", "vlan20", "vlan30"],
+        "connection_types": ["Link"],
+        "deployment_context": "datacenter"
+    },
+    "modified_topology": {
+        "devices": [
+            {
+                "id": "cisco_catalyst_9500",
+                "type": "switch",
+                "vendor": "cisco",
+                "model": "Catalyst 9500",
+                "specifications": {},
+                "connections": ["aruba_cx6300", "juniper_ex4300"],
+                "location": "top",
+                "role": "core"
+            },
+            {
+                "id": "aruba_cx6300",
+                "type": "switch",
+                "vendor": "aruba",
+                "model": "CX 6300",
+                "specifications": {},
+                "connections": ["cisco_catalyst_9500", "juniper_srx"],
+                "location": "left-middle",
+                "role": "distribution"
+            },
+            {
+                "id": "juniper_srx",
+                "type": "firewall",
+                "vendor": "juniper",
+                "model": "SRX",
+                "specifications": {},
+                "connections": ["aruba_cx6300", "cisco_router"],
+                "location": "left-middle",
+                "role": "firewall"
+            },
+            {
+                "id": "juniper_ex4300",
+                "type": "switch",
+                "vendor": "juniper",
+                "model": "EX4300",
+                "specifications": {},
+                "connections": ["cisco_catalyst_9500", "cisco_access_switch"],
+                "location": "right-middle",
+                "role": "distribution"
+            },
+            {
+                "id": "cisco_access_switch",
+                "type": "switch",
+                "vendor": "cisco",
+                "model": "CISO",
+                "specifications": {},
+                "connections": [
+                    "juniper_ex4300",
+                    "workstation_vlan10",
+                    "workstation_vlan20",
+                    "workstation_vlan30",
+                    "wireless_access_point"
+                ],
+                "location": "right-middle",
+                "role": "access"
+            },
+            {
+                "id": "cisco_router",
+                "type": "router",
+                "vendor": "cisco",
+                "model": "Ruter",
+                "specifications": {},
+                "connections": ["juniper_srx", "internet"],
+                "location": "left-bottom",
+                "role": "edge"
+            },
+            {
+                "id": "wireless_access_point",
+                "type": "access_point",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-middle",
+                "role": "access"
+            },
+            {
+                "id": "workstation_vlan10",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "workstation_vlan20",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "workstation_vlan30",
+                "type": "workstation",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_access_switch"],
+                "location": "right-bottom",
+                "role": "client"
+            },
+            {
+                "id": "internet",
+                "type": "gateway",
+                "vendor": "generic",
+                "model": "unknown",
+                "specifications": {},
+                "connections": ["cisco_router"],
+                "location": "bottom-left",
+                "role": "internet"
+            }
+        ],
+        "topology_structure": "Hierarchical topology with a core layer (Cisco Catalyst 9500), distribution layer (Aruba CX 6300, Juniper EX4300), and access layer (Cisco CISO switch).  A Juniper SRX firewall is placed between the core and distribution layers on the left side. A Cisco router connects to the internet.",
+        "network_segments": ["vlan10", "vlan20", "vlan30"],
+        "connection_types": ["Link"],
+        "deployment_context": "datacenter"
+    },
+    "recommendations": {
+        "replacements": [
+            {
+                "original_device": {
+                    "id": "cisco_catalyst_9500",
+                    "vendor": "cisco",
+                    "model": "Catalyst 9500",
+                    "limitations": []
+                },
+                "recommended_device": {
+                    "vendor": "aruba",
+                    "model": "CX 8300",
+                    "features": [
+                        "High-performance switching",
+                        "Advanced security features",
+                        "VXLAN support",
+                        "Multi-tenancy"
+                    ],
+                    "specifications": {
+                        "ports": "Variable, depending on chassis configuration",
+                        "throughput": "High, exceeding 1Tbps in some configurations"
+                    },
+                    "justification": "The Aruba CX 8300 offers comparable performance and scalability to the Cisco Catalyst 9500, while providing a unified platform for networking and security.  Its advanced features like VXLAN support and multi-tenancy enhance flexibility and efficiency. The 8300 is chosen over smaller CX models due to the core's role and the likely future growth.",
+                    "cost_benefit": "High initial investment, but potential for long-term cost savings through reduced operational complexity and increased efficiency.",
+                    "migration_complexity": "Medium"
+                },
+                "compatibility_analysis": {
+                    "existing_connections": "Requires compatible cabling and configuration changes.",
+                    "protocol_support": "Supports standard protocols like STP, RSTP, MSTP, and OSPF.",
+                    "potential_issues": [
+                        "Potential configuration migration challenges"
+                    ]
+                }
+            },
+            {
+                "original_device": {
+                    "id": "aruba_cx6300",
+                    "vendor": "aruba",
+                    "model": "CX 6300",
+                    "limitations": []
+                },
+                "recommended_device": {
+                    "vendor": "aruba",
+                    "model": "CX 6300",
+                    "features": ["Consistent with existing device"],
+                    "specifications": {
+                        "ports": "Variable",
+                        "throughput": "High"
+                    },
+                    "justification": "No replacement needed; already an Aruba CX device.",
+                    "cost_benefit": "No cost involved.",
+                    "migration_complexity": "Low"
+                },
+                "compatibility_analysis": {
+                    "existing_connections": "Direct compatibility.",
+                    "protocol_support": "Direct compatibility.",
+                    "potential_issues": []
+                }
+            },
+            {
+                "original_device": {
+                    "id": "juniper_srx",
+                    "vendor": "juniper",
+                    "model": "SRX",
+                    "limitations": []
+                },
+                "recommended_device": {
+                    "vendor": "aruba",
+                    "model": "CX 8300 with integrated security features",
+                    "features": [
+                        "Next-generation firewall capabilities",
+                        "Integration with CX switching platform"
+                    ],
+                    "specifications": {
+                        "ports": "Variable, depending on chassis configuration",
+                        "throughput": "High, potentially exceeding the Juniper SRX depending on the configuration"
+                    },
+                    "justification": "The Aruba CX 8300's integrated security features eliminate the need for a separate firewall, simplifying the network and reducing costs.  This consolidates security and switching functions onto a single platform.",
+                    "cost_benefit": "Higher initial cost than replacing only the firewall, but lower operational costs and increased efficiency.",
+                    "migration_complexity": "Medium"
+                },
+                "compatibility_analysis": {
+                    "existing_connections": "Requires compatible cabling and configuration changes.",
+                    "protocol_support": "Supports standard firewall protocols.",
+                    "potential_issues": [
+                        "Migration of firewall rules and policies."
+                    ]
+                }
+            },
+            {
+                "original_device": {
+                    "id": "juniper_ex4300",
+                    "vendor": "juniper",
+                    "model": "EX4300",
+                    "limitations": []
+                },
+                "recommended_device": {
+                    "vendor": "aruba",
+                    "model": "CX 6200",
+                    "features": [
+                        "High-performance switching",
+                        "Layer 3 features"
+                    ],
+                    "specifications": {
+                        "ports": "Variable",
+                        "throughput": "High"
+                    },
+                    "justification": "The Aruba CX 6200 offers comparable functionality to the Juniper EX4300, maintaining the hierarchical structure and feature parity.  It's chosen for cost effectiveness while keeping a similar feature set.",
+                    "cost_benefit": "Medium to high initial investment but potential for long-term cost savings.",
+                    "migration_complexity": "Medium"
+                },
+                "compatibility_analysis": {
+                    "existing_connections": "Requires compatible cabling and configuration changes.",
+                    "protocol_support": "Supports standard protocols like STP, RSTP, MSTP, and OSPF.",
+                    "potential_issues": [
+                        "Potential configuration migration challenges"
+                    ]
+                }
+            },
+            {
+                "original_device": {
+                    "id": "cisco_access_switch",
+                    "vendor": "cisco",
+                    "model": "CISO",
+                    "limitations": []
+                },
+                "recommended_device": {
+                    "vendor": "aruba",
+                    "model": "CX 6100",
+                    "features": [
+                        "High-performance switching",
+                        "Layer 2 features",
+                        "PoE+ support"
+                    ],
+                    "specifications": {
+                        "ports": "Variable",
+                        "throughput": "High"
+                    },
+                    "justification": "The Aruba CX 6100 is a cost-effective solution for the access layer, offering sufficient performance and PoE+ for the connected devices.",
+                    "cost_benefit": "Relatively low cost.",
+                    "migration_complexity": "Medium"
+                },
+                "compatibility_analysis": {
+                    "existing_connections": "Requires compatible cabling and configuration changes.",
+                    "protocol_support": "Supports standard protocols like STP, RSTP, and MSTP.",
+                    "potential_issues": [
+                        "Potential configuration migration challenges"
+                    ]
+                }
+            }
+        ],
+        "topology_modifications": {
+            "structural_changes": "The core will be replaced with an Aruba CX 8300, which integrates the security capabilities of the Juniper SRX.  Distribution and Access layers will be replaced with Aruba CX 6200 and CX 6100 respectively.",
+            "performance_impact": "Improved performance and scalability are expected due to the advanced features of the Aruba CX platform.",
+            "security_enhancements": "Enhanced security through the integrated security features of the Aruba CX 8300."
+        },
+        "implementation_plan": {
+            "phases": [
+                {
+                    "phase_number": 1,
+                    "description": "Planning and design phase.",
+                    "duration": "2 weeks",
+                    "devices_affected": [],
+                    "risk_level": "low"
+                },
+                {
+                    "phase_number": 2,
+                    "description": "Procurement and testing phase.",
+                    "duration": "4 weeks",
+                    "devices_affected": [],
+                    "risk_level": "low"
+                },
+                {
+                    "phase_number": 3,
+                    "description": "Phased rollout of the new devices.",
+                    "duration": "8 weeks",
+                    "devices_affected": [
+                        "cisco_catalyst_9500",
+                        "aruba_cx6300",
+                        "juniper_srx",
+                        "juniper_ex4300",
+                        "cisco_access_switch"
+                    ],
+                    "risk_level": "medium"
+                },
+                {
+                    "phase_number": 4,
+                    "description": "Final cutover and decommissioning of old devices.",
+                    "duration": "2 weeks",
+                    "devices_affected": [
+                        "cisco_catalyst_9500",
+                        "juniper_srx",
+                        "juniper_ex4300",
+                        "cisco_access_switch"
+                    ],
+                    "risk_level": "medium"
+                }
+            ],
+            "prerequisites": [
+                "Detailed network documentation",
+                "Backup of existing configurations",
+                "Thorough testing plan"
+            ],
+            "testing_strategy": "Rigorous testing will be conducted in a staging environment before deployment to production."
+        },
+        "cost_analysis": {
+            "hardware_costs": "The cost will vary depending on specific model choices and quantity.  A detailed quote is needed from an Aruba vendor.",
+            "implementation_costs": "Include professional services for design, implementation, and migration.",
+            "operational_savings": "Potential savings through reduced operational complexity and consolidated management.",
+            "total_project_cost": "A detailed cost estimate will require further information on specific model choices, quantities, and professional services."
+        }
+    },
+    "diagrams": {
+        "original": "---\ntitle: Original Network Topology\n---\ngraph TD\n    %% Vendor-specific styling\n    classDef cisco fill:#1BA0D7,stroke:#333,stroke-width:2px,color:#fff\n    classDef juniper fill:#84BD00,stroke:#333,stroke-width:2px,color:#fff  \n    classDef aruba fill:#FF6900,stroke:#333,stroke-width:2px,color:#fff\n    classDef arista fill:#F80000,stroke:#333,stroke-width:2px,color:#fff\n    classDef hpe fill:#01A982,stroke:#333,stroke-width:2px,color:#fff\n    classDef generic fill:#6C757D,stroke:#333,stroke-width:2px,color:#fff\n    classDef replaced fill:#FFE4B5,stroke:#FF8C00,stroke-width:3px,color:#333\n    \n    %% Device nodes\n    cisco_catalyst_9500[\"🔄 cisco_catalyst_9500<br/>Model: Catalyst 9500\"]\n    class cisco_catalyst_9500 cisco\n    aruba_cx6300[\"🔄 aruba_cx6300<br/>Model: CX 6300\"]\n    class aruba_cx6300 aruba\n    juniper_srx[\"🛡️ juniper_srx<br/>Model: SRX\"]\n    class juniper_srx juniper\n    juniper_ex4300[\"🔄 juniper_ex4300<br/>Model: EX4300\"]\n    class juniper_ex4300 juniper\n    cisco_access_switch[\"🔄 cisco_access_switch<br/>Model: CISO\"]\n    class cisco_access_switch cisco\n    cisco_router[\"🔀 cisco_router<br/>Model: Ruter\"]\n    class cisco_router cisco\n    wireless_access_point[\"📡 wireless_access_point<br/>Model: unknown\"]\n    class wireless_access_point generic\n    workstation_vlan10[\"💻 workstation_vlan10<br/>Model: unknown\"]\n    class workstation_vlan10 generic\n    workstation_vlan20[\"💻 workstation_vlan20<br/>Model: unknown\"]\n    class workstation_vlan20 generic\n    workstation_vlan30[\"💻 workstation_vlan30<br/>Model: unknown\"]\n    class workstation_vlan30 generic\n    internet[\"🚪 internet<br/>Model: unknown\"]\n    class internet generic\n\n    %% Network connections\n    cisco_catalyst_9500 ---|Link| aruba_cx6300\n    cisco_catalyst_9500 ---|Link| juniper_ex4300\n    aruba_cx6300 ---|Link| juniper_srx\n    juniper_srx ---|Link| cisco_router\n    juniper_ex4300 ---|Link| cisco_access_switch\n    cisco_access_switch ---|Link| workstation_vlan10\n    cisco_access_switch ---|Link| workstation_vlan20\n    cisco_access_switch ---|Link| workstation_vlan30\n    cisco_access_switch ---|Link| wireless_access_point\n    cisco_router ---|Link| internet\n",
+        "modified": "---\ntitle: Modified Network Topology\n---\ngraph TD\n    %% Vendor-specific styling\n    classDef cisco fill:#1BA0D7,stroke:#333,stroke-width:2px,color:#fff\n    classDef juniper fill:#84BD00,stroke:#333,stroke-width:2px,color:#fff  \n    classDef aruba fill:#FF6900,stroke:#333,stroke-width:2px,color:#fff\n    classDef arista fill:#F80000,stroke:#333,stroke-width:2px,color:#fff\n    classDef hpe fill:#01A982,stroke:#333,stroke-width:2px,color:#fff\n    classDef generic fill:#6C757D,stroke:#333,stroke-width:2px,color:#fff\n    classDef replaced fill:#FFE4B5,stroke:#FF8C00,stroke-width:3px,color:#333\n    \n    %% Device nodes\n    cisco_catalyst_9500[\"🔄 cisco_catalyst_9500<br/>Model: Catalyst 9500\"]\n    class cisco_catalyst_9500 cisco\n    aruba_cx6300[\"🔄 aruba_cx6300<br/>Model: CX 6300\"]\n    class aruba_cx6300 aruba\n    juniper_srx[\"🛡️ juniper_srx<br/>Model: SRX\"]\n    class juniper_srx juniper\n    juniper_ex4300[\"🔄 juniper_ex4300<br/>Model: EX4300\"]\n    class juniper_ex4300 juniper\n    cisco_access_switch[\"🔄 cisco_access_switch<br/>Model: CISO\"]\n    class cisco_access_switch cisco\n    cisco_router[\"🔀 cisco_router<br/>Model: Ruter\"]\n    class cisco_router cisco\n    wireless_access_point[\"📡 wireless_access_point<br/>Model: unknown\"]\n    class wireless_access_point generic\n    workstation_vlan10[\"💻 workstation_vlan10<br/>Model: unknown\"]\n    class workstation_vlan10 generic\n    workstation_vlan20[\"💻 workstation_vlan20<br/>Model: unknown\"]\n    class workstation_vlan20 generic\n    workstation_vlan30[\"💻 workstation_vlan30<br/>Model: unknown\"]\n    class workstation_vlan30 generic\n    internet[\"🚪 internet<br/>Model: unknown\"]\n    class internet generic\n\n    %% Network connections\n    cisco_catalyst_9500 ---|Link| aruba_cx6300\n    cisco_catalyst_9500 ---|Link| juniper_ex4300\n    aruba_cx6300 ---|Link| juniper_srx\n    juniper_srx ---|Link| cisco_router\n    juniper_ex4300 ---|Link| cisco_access_switch\n    cisco_access_switch ---|Link| workstation_vlan10\n    cisco_access_switch ---|Link| workstation_vlan20\n    cisco_access_switch ---|Link| workstation_vlan30\n    cisco_access_switch ---|Link| wireless_access_point\n    cisco_router ---|Link| internet\n",
+        "comparison": "---\ntitle: Network Topology Comparison - Before and After\n---\ngraph LR\n    subgraph \"🔄 ORIGINAL\"\n        direction TD\n        orig_cisco_catalyst_9500[\"🔄 cisco_catalyst_9500<br/>cisco Catalyst 9500\"]\n        orig_aruba_cx6300[\"🔄 aruba_cx6300<br/>aruba CX 6300\"]\n        orig_juniper_srx[\"🛡️ juniper_srx<br/>juniper SRX\"]\n        orig_juniper_ex4300[\"🔄 juniper_ex4300<br/>juniper EX4300\"]\n        orig_cisco_access_switch[\"🔄 cisco_access_switch<br/>cisco CISO\"]\n        orig_cisco_router[\"🔀 cisco_router<br/>cisco Ruter\"]\n        orig_wireless_access_point[\"📡 wireless_access_point<br/>generic unknown\"]\n        orig_workstation_vlan10[\"💻 workstation_vlan10<br/>generic unknown\"]\n        orig_workstation_vlan20[\"💻 workstation_vlan20<br/>generic unknown\"]\n        orig_workstation_vlan30[\"💻 workstation_vlan30<br/>generic unknown\"]\n        orig_internet[\"🚪 internet<br/>generic unknown\"]\n    end\n    \n    subgraph \"✨ MODIFIED\"\n        direction TD\n        mod_cisco_catalyst_9500[\"🔄 cisco_catalyst_9500<br/>cisco Catalyst 9500\"]\n        mod_aruba_cx6300[\"🔄 aruba_cx6300<br/>aruba CX 6300\"]\n        mod_juniper_srx[\"🛡️ juniper_srx<br/>juniper SRX\"]\n        mod_juniper_ex4300[\"🔄 juniper_ex4300<br/>juniper EX4300\"]\n        mod_cisco_access_switch[\"🔄 cisco_access_switch<br/>cisco CISO\"]\n        mod_cisco_router[\"🔀 cisco_router<br/>cisco Ruter\"]\n        mod_wireless_access_point[\"📡 wireless_access_point<br/>generic unknown\"]\n        mod_workstation_vlan10[\"💻 workstation_vlan10<br/>generic unknown\"]\n        mod_workstation_vlan20[\"💻 workstation_vlan20<br/>generic unknown\"]\n        mod_workstation_vlan30[\"💻 workstation_vlan30<br/>generic unknown\"]\n        mod_internet[\"🚪 internet<br/>generic unknown\"]\n    end\n"
+    },
+    "analysis_summary": "Analysis completed successfully",
+    "topology_explanation": "Network topology analyzed and recommendations generated",
+    "context_sources": "<h1>Response</h1>\n\n<h2>Introduction</h2>\n\n<p>This response provides a detailed analysis for replacing Cisco and Juniper devices with Aruba CX devices, ensuring feature parity. The solution includes a network topology, feature comparison, configuration examples, and a cost analysis.</p>\n\n<h2>Feature Comparison and Device Selection</h2>\n\n<h3>Assumptions</h3>\n\n<ul>\n<li><strong>Cisco Devices</strong>: Cisco Nexus 9000 Series (e.g., Nexus 9332C)</li>\n<li><strong>Juniper Devices</strong>: Juniper QFX5200 Series</li>\n<li><strong>Aruba Devices</strong>: Aruba CX 8400 and 6300 Series</li>\n</ul>\n\n<h3>Key Features Comparison</h3>\n\n<table>\n<thead>\n<tr>\n  <th><strong>Feature</strong></th>\n  <th><strong>Cisco Nexus 9000</strong></th>\n  <th><strong>Juniper QFX5200</strong></th>\n  <th><strong>Aruba CX 8400/6300</strong></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n  <td><strong>Port Density</strong></td>\n  <td>High (48x 1/10G)</td>\n  <td>High (48x 1/10G)</td>\n  <td>High (48x 1/10G)</td>\n</tr>\n<tr>\n  <td><strong>Switching Capacity</strong></td>\n  <td>3.6 Tbps</td>\n  <td>3.8 Tbps</td>\n  <td>3.8 Tbps</td>\n</tr>\n<tr>\n  <td><strong>EVPN/VXLAN Support</strong></td>\n  <td>Yes</td>\n  <td>Yes</td>\n  <td>Yes</td>\n</tr>\n<tr>\n  <td><strong>Redundancy</strong></td>\n  <td>VSS/ISSU</td>\n  <td>MC-LAG/ISSU</td>\n  <td>IRF/ISSU</td>\n</tr>\n<tr>\n  <td><strong>Security Features</strong></td>\n  <td>ACI, micro-segmentation</td>\n  <td>Junos Space, micro-segmentation</td>\n  <td>Aruba Fabric, micro-segmentation</td>\n</tr>\n<tr>\n  <td><strong>OS Features</strong></td>\n  <td>NX-OS</td>\n  <td>Junos OS</td>\n  <td>ArubaOS</td>\n</tr>\n</tbody>\n</table>\n\n<h3>Gaps and Justifications</h3>\n\n<ul>\n<li><strong>Aruba CX 8400/6300</strong>:\n<ul>\n<li><strong>Gap</strong>: Slightly lower port density compared to Cisco Nexus 9000.</li>\n<li><strong>Justification</strong>: Aruba's ease of management and integration with Aruba Fabric compensate for this gap.</li>\n</ul></li>\n</ul>\n\n<h2>Network Topology</h2>\n\n<h3>Current Topology</h3>\n\n<p><code>\nCisco Nexus 9000 (Core)\n|\n|-- Juniper QFX5200 (Distribution)\n    |\n    |-- Access Layer Switches\n</code></p>\n\n<h3>Proposed Topology with Aruba CX</h3>\n\n<p><code>\nAruba CX 8400 (Core)\n|\n|-- Aruba CX 6300 (Distribution)\n    |\n    |-- Access Layer Switches\n</code></p>\n\n<h2>Configuration Examples</h2>\n\n<h3>VLAN Configuration on Aruba CX</h3>\n\n<p><code>cli\nconfigure terminal\nvlan 10\n  name Management\n  untagged 1/1/1\nexit\nvlan 20\n  name Data\n  untagged 1/1/2\nexit\n</code></p>\n\n<h3>Interconnect Configuration (IRF)</h3>\n\n<p><code>cli\nconfigure terminal\nstacking\n  enable\n  stack-member 1\n    mac-address &lt;MAC-Address&gt;\n  stack-member 2\n    mac-address &lt;MAC-Address&gt;\nexit\n</code></p>\n\n<h3>Redundancy Configuration (ISSU)</h3>\n\n<p><code>cli\nconfigure terminal\nboot system primary flash primary_image.bin\nboot system secondary flash secondary_image.bin\nissu enable\nexit\n</code></p>\n\n<h2>Cost Analysis</h2>\n\n<h3>Cost Comparison</h3>\n\n<table>\n<thead>\n<tr>\n  <th><strong>Device</strong></th>\n  <th><strong>Cisco List Price</strong></th>\n  <th><strong>Juniper List Price</strong></th>\n  <th><strong>Aruba List Price</strong></th>\n</tr>\n</thead>\n<tbody>\n<tr>\n  <td><strong>Core Switch</strong></td>\n  <td>$45,000</td>\n  <td>$42,000</td>\n  <td>$40,000</td>\n</tr>\n<tr>\n  <td><strong>Distribution Switch</strong></td>\n  <td>$30,000</td>\n  <td>$28,000</td>\n  <td>$26,000</td>\n</tr>\n<tr>\n  <td><strong>Total</strong></td>\n  <td>$75,000</td>\n  <td>$70,000</td>\n  <td>$66,000</td>\n</tr>\n</tbody>\n</table>\n\n<h3>Cost Justification</h3>\n\n<ul>\n<li><strong>Total Cost Savings</strong>: $9,000 (12% less than Cisco)</li>\n<li><strong>Value Added</strong>: Aruba's integrated management and Aruba Fabric enhance network manageability and security.</li>\n</ul>\n\n<h2>Justification and Conclusion</h2>\n\n<h3>Feature Parity and Enhancements</h3>\n\n<ul>\n<li><strong>Aruba CX 8400/6300</strong> offer comparable or superior features to Cisco and Juniper devices, with advanced security and ease of management.</li>\n<li><strong>Redundancy and HA</strong> are maintained through IRF and ISSU, ensuring high availability.</li>\n</ul>\n\n<h3>Economic Advantage</h3>\n\n<ul>\n<li><strong>Cost-Effective</strong>: Aruba devices provide significant cost savings without compromising on features.</li>\n<li><strong>Ease of Integration</strong>: Simplifies network management and reduces operational costs.</li>\n</ul>\n\n<h3>Conclusion</h3>\n\n<p>Replacing Cisco and Juniper devices with Aruba CX 8400 and 6300 Series offers a cost-effective, feature-rich solution with enhanced manageability and security. The proposed topology and configuration ensure seamless integration and maintain redundancy and HA.</p>\n",
+    "modification_details": {
+        "total_replacements": 5
+    },
+    "implementation_guidance": {
+        "phases": []
+    },
+    "error": null
+}

@@ -1,0 +1,3 @@
+Replace the cisco and juniper devices with appropriate aruba CX devices such that the chosen aruba CX devices have feature parity with the existing devices in the diagram. If there is a feature gap then point it out as well and also give a reason why a particular Aruba CX device has been chosen. 
+Provide me the cost analysis also give me the justification in more detail.
+Provide the detailed justification of the comparison by comparing various functional features, scale,redundancy support,HA and cost.

@@ -1,0 +1,17 @@
+A. Provide a feature comparision between the CISCO 9300 and Aruba CX 8425 switches.
+
+1. What are the maximum stacking and Virtual Switching Extension (VSX) limits of Aruba CX 6300/6400/10000 series compared to Arista 7280R3/7500R3 Multi-Chassis Link Aggregation (MLAG) and CVX-based clustering?
+
+2. Which of the following security features—MACsec (IEEE 802.1AE),
+   Dynamic Segmentation, role-based access control, and TrustSec—are available on
+   Arista 7280/7500R3 using CloudVision and EOS?
+
+[Agentic Rag search] 3. How do Aruba’s Dynamic Segmentation (using ClearPass and CX
+switches) compare to Cisco’s TrustSec and SGT (with DNA Center), Juniper’s
+logical system partitioning and firewall filters, Arista’s multi-domain segmentation
+(as seen in the Arista Multi-Domain Segmentation datasheet)?"
+
+Topology Query:
+Replace the cisco and juniper devices with appropriate aruba CX devices such that the chosen aruba CX devices have feature parity with the existing devices in the diagram. If there is a feature gap then point it out as well and also give a reason why a particular Aruba CX device has been chosen.
+Provide me the cost analysis also give me the justification in more detail.
+Provide the detailed justification of the comparison by comparing various functional features, scale,redundancy support,HA and cost.
